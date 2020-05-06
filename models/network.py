@@ -44,7 +44,7 @@ class AttLSTM(BasicModule):
         merged_state = merged_state.squeeze(0).unsqueeze(2)
         print(merged_state.size())
 
-        ogema = nn.Parameter(t.zeros(batch_size, hidden_size, hidden_size), requires_grad=True)
+        ogema = nn.Parameter(t.zeros(batch_size, hidden_size, hidden_size), requires_grad=True).cuda()
         # [batch, hidden_size, hidden_size], [batch, hidden_size, 1] -> [batch, hidden_size, 1]
         weights = t.bmm(ogema, merged_state)
         weights = F.softmax(weights.squeeze(2)).unsqueeze(2)
