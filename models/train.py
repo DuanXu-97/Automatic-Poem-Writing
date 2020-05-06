@@ -20,12 +20,11 @@ def train(args):
     vis = Visualizer()
 
     config = getattr(configs, args.model + 'Config')()
-    model = getattr(network, args.model)(config).eval()
-
     dataset = PoemDataset(data_path=config.data_path, config=config)
-    dataloader = DataLoader(dataset, config.batch_size,
-                            shuffle=True,
-                            num_workers=config.num_workers)
+    dataloader = DataLoader(dataset, config.batch_size, shuffle=True, num_workers=config.num_workers)
+    config.vocab_size = dataset.vocab_size
+
+    model = getattr(network, args.model)(config).eval()
 
     if args.load_model_path:
         model.load(args.load_model_path)
@@ -45,7 +44,6 @@ def train(args):
         loss_meter.reset()
 
         for _iter, data in enumerate(dataloader):
-
             data = data.long().transpose(1,0).contiguous()
 
             if args.use_gpu:
@@ -58,10 +56,11 @@ def train(args):
             loss.backward()
             optimizer.step()
 
-            loss_meter.add(loss.data[0])
+            loss_meter.add(loss.item())
 
             if _iter % config.print_freq == 0:
                 vis.plot('train_loss', loss_meter.value()[0])
+
         model.save(path=os.path.join(args.ckpts_dir, 'model_{0}.pth'.format(str(epoch))))
 
         vis.log("epoch:{epoch}, train_loss:{train_loss}".format(
@@ -90,7 +89,6 @@ if __name__ == '__main__':
     parser.add_argument('--ckpts_dir', type=str, default=None, help="Dir to store checkpoints")
 
     args = parser.parse_args()
-
     if not os.path.exists(args.ckpts_dir):
         os.makedirs(args.ckpts_dir)
 
