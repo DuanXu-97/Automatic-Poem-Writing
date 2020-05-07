@@ -104,7 +104,7 @@ def generate_with_acrostic(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--model', type=str, default='ResNet', help="model to be used")
+    parser.add_argument('--model', type=str, default='AttLSTM', help="model to be used")
     parser.add_argument('--use_gpu', action='store_true', help="whether use gpu")
     parser.add_argument('--load_model_path', type=str, required=True, help="Path of trained model")
     parser.add_argument('--acrostic', action='store_true', help="whether generate acrostic poem")

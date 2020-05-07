@@ -82,7 +82,7 @@ def train(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--model', type=str, default='ResNet', help="model to be used")
+    parser.add_argument('--model', type=str, default='AttLSTM', help="model to be used")
     parser.add_argument('--pretrain', action='store_true', help="whether use pretrained model")
     parser.add_argument('--use_gpu', action='store_true', help="whether use gpu")
     parser.add_argument('--load_model_path', type=str, default=None, help="Path of pre-trained model")
