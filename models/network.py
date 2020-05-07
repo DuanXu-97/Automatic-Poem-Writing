@@ -109,13 +109,12 @@ class GRU(BasicModule):
         seq_len, batch_size = x.size()
         if hidden is None:
             h_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
-            c_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
-            h_0, c_0 = Variable(h_0), Variable(c_0)
+            h_0 = Variable(h_0)
         else:
-            h_0, c_0 = hidden
+            h_0 = hidden
 
         x = self.embeddings(x)
-        x, hidden = self.gru(x, (h_0, c_0))
+        x, hidden = self.gru(x, h_0)
         output = self.fc(x.reshape(seq_len*batch_size, -1))
         return output, hidden
 
@@ -134,13 +133,12 @@ class BiGRU(BasicModule):
         seq_len, batch_size = x.size()
         if hidden is None:
             h_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
-            c_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
-            h_0, c_0 = Variable(h_0), Variable(c_0)
+            h_0, = Variable(h_0)
         else:
-            h_0, c_0 = hidden
+            h_0 = hidden
 
         x = self.embeddings(x)
-        x, hidden = self.gru(x, (h_0, c_0))
+        x, hidden = self.gru(x, h_0)
         output = self.fc(x.reshape(seq_len*batch_size, -1))
         return output, hidden
 
