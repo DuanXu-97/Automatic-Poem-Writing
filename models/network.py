@@ -164,21 +164,22 @@ class ShortcutGRU(BasicModule):
     def forward(self, x, hidden=None):
         seq_len, batch_size = x.size()
         if hidden is None:
-            h_0 = x.data.new(4, batch_size, self.config.hidden_dim_1).fill_(0).float()
-            h_0 = Variable(h_0)
+            h1_0 = x.data.new(2, batch_size, self.config.hidden_dim_1).fill_(0).float()
+            h2_0 = x.data.new(2, batch_size, self.config.hidden_dim_2).fill_(0).float()
+            h1_0, h2_0 = Variable(h1_0), Variable(h2_0)
         else:
-            h_0 = hidden
+            h1_0, h2_0 = hidden
 
         x = self.embeddings(x)
         index_1 = t.LongTensor([0, 1]).cuda() if self.config.use_gpu else t.LongTensor([0, 1])
-        gru1_output, gru1_hidden = self.gru1(x, t.index_select(h_0, dim=0, index=index_1))
+        gru1_output, gru1_hidden = self.gru1(x, t.index_select(h1_0, dim=0, index=index_1))
         x = t.cat([x, gru1_output], dim=-1)
         x = self.dropout(x)
         index_2 = t.LongTensor([2, 3]).cuda() if self.config.use_gpu else t.LongTensor([0, 1])
-        x, gru2_hidden = self.gru2(x, t.index_select(h_0, dim=0, index=index_2))
+        x, gru2_hidden = self.gru2(x, t.index_select(h2_0, dim=0, index=index_2))
         x = self.dropout(x)
         output = self.fc(x)
-        hidden = t.cat([gru1_hidden, gru2_hidden], dim=0)
+        hidden = (gru1_hidden, gru2_hidden)
 
         return output, hidden
 
