@@ -95,30 +95,6 @@ class LSTM(BasicModule):
         return output, hidden
 
 
-class GRU(BasicModule):
-
-    def __init__(self, config):
-        super(GRU, self).__init__()
-
-        self.config = config
-        self.embeddings = nn.Embedding(self.config.vocab_size, self.config.embedding_dim)
-        self.gru = nn.GRU(self.config.embedding_dim, self.config.hidden_dim, num_layers=self.config.num_layers, batch_first=False)
-        self.fc = nn.Linear(self.config.hidden_dim, self.config.vocab_size)
-
-    def forward(self, x, hidden=None):
-        seq_len, batch_size = x.size()
-        if hidden is None:
-            h_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
-            h_0 = Variable(h_0)
-        else:
-            h_0 = hidden
-
-        x = self.embeddings(x)
-        x, hidden = self.gru(x, h_0)
-        output = self.fc(x.reshape(seq_len*batch_size, -1))
-        return output, hidden
-
-
 class BiGRU(BasicModule):
 
     def __init__(self, config):
@@ -173,6 +149,38 @@ class ShortcutGRU(BasicModule):
         x = self.embeddings(x)
         gru1_output, gru1_hidden = self.gru1(x, h1_0)
         x = t.cat([x, gru1_output], dim=-1)
+        x = self.dropout(x)
+        x, gru2_hidden = self.gru2(x, h2_0)
+        x = self.dropout(x)
+        output = self.fc(x.reshape(seq_len*batch_size, -1))
+        hidden = (gru1_hidden, gru2_hidden)
+
+        return output, hidden
+
+
+class GRU(BasicModule):
+
+    def __init__(self, config):
+        super(GRU, self).__init__()
+
+        self.config = config
+        self.embeddings = nn.Embedding(self.config.vocab_size, self.config.embedding_dim)
+        self.gru1 = nn.GRU(self.config.embedding_dim, self.config.hidden_dim_1, num_layers=self.config.num_layers, batch_first=False)
+        self.gru2 = nn.GRU(self.config.hidden_dim_1, self.config.hidden_dim_2, num_layers=self.config.num_layers, batch_first=False)
+        self.dropout = nn.Dropout(self.config.dropout_rate)
+        self.fc = nn.Linear(self.config.hidden_dim_2, self.config.vocab_size)
+
+    def forward(self, x, hidden=None):
+        seq_len, batch_size = x.size()
+        if hidden is None:
+            h1_0 = x.data.new(2, batch_size, self.config.hidden_dim_1).fill_(0).float()
+            h2_0 = x.data.new(2, batch_size, self.config.hidden_dim_2).fill_(0).float()
+            h1_0, h2_0 = Variable(h1_0), Variable(h2_0)
+        else:
+            h1_0, h2_0 = hidden
+
+        x = self.embeddings(x)
+        x, gru1_hidden = self.gru1(x, h1_0)
         x = self.dropout(x)
         x, gru2_hidden = self.gru2(x, h2_0)
         x = self.dropout(x)
