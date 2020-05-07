@@ -115,7 +115,7 @@ class ShortcutGRUConfig(object):
     max_len = 125
 
     batch_size = 128
-    epoch = 20
+    epoch = 30
     lr = 0.001
     seed = 10
 
