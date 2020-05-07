@@ -17,6 +17,7 @@ def generate_with_beginning(args):
     config.vocab_size = dataset.vocab_size
     config.word2ix = dataset.word2ix
     config.ix2word = dataset.ix2word
+    config.use_gpu = args.use_gpu
     model = getattr(network, args.model)(config).eval()
 
     if args.load_model_path:
@@ -44,7 +45,8 @@ def generate_with_beginning(args):
             input = Variable(input.data.new([config.word2ix[word]]).view(1,1))
 
         else:
-            word_index = output.data[0].topk(1)[1][0]
+            word_index = output.data[0].topk(1)[1][0].item()
+            print(word_index)
             word = config.ix2word[word_index]
             poem.append(word)
             input = Variable(input.data.new([word_index]).view(1,1))
@@ -82,7 +84,7 @@ def generate_with_acrostic(args):
 
     for i in range(config.max_len):
         output, hidden = model(input, hidden)
-        word_index = output.data[0].topk(1)[1][0]
+        word_index = output.data[0].topk(1)[1][0].item()
         word = config.ix2word[word_index]
 
         if pre_word in ['。', '<START>']:
@@ -110,7 +112,6 @@ if __name__ == '__main__':
     parser.add_argument('--acrostic', action='store_true', help="whether generate acrostic poem")
     parser.add_argument('--given_words', type=str, required=True, help="given words to generate poem")
     parser.add_argument('--prefix_words', type=str, default='床前明月光，疑是地上霜', help="given words to generate poem")
-
 
     args = parser.parse_args()
 

@@ -10,8 +10,12 @@ class BasicModule(nn.Module):
     def __init__(self):
         super(BasicModule, self).__init__()
 
-    def load(self, path):
-        self.load_state_dict(t.load(path))
+    def load(self, path, use_gpu=False):
+        if use_gpu:
+            self.load_state_dict(t.load(path))
+        else:
+            self.load_state_dict(t.load(path, map_location=t.device('cpu')))
+
 
     def save(self, path):
         t.save(self.state_dict(), path)
@@ -36,9 +40,11 @@ class AttLSTM(BasicModule):
         merged_state = t.mean(final_state, 0)
 
         # [batch, hidden_size]->[batch, hidden_size, 1]
-        merged_state = merged_state.squeeze(0).unsqueeze(2)
+        merged_state = merged_state.unsqueeze(2)
 
-        ogema = nn.Parameter(t.zeros(batch_size, hidden_size, hidden_size), requires_grad=True).cuda()
+        ogema = nn.Parameter(t.zeros(batch_size, hidden_size, hidden_size), requires_grad=True)
+        if self.config.use_gpu:
+            ogema = ogema.cuda()
         # [batch, hidden_size, hidden_size], [batch, hidden_size, 1] -> [batch, hidden_size, 1]
         weights = t.bmm(ogema, merged_state)
         weights = F.softmax(weights.squeeze(2)).unsqueeze(2)
@@ -57,6 +63,7 @@ class AttLSTM(BasicModule):
 
         x = self.embeddings(x)
         lstm_output, lstm_hidden = self.lstm(x, (h_0, c_0))
+
         x = self.attention(lstm_output, lstm_hidden[0])
 
         output = self.fc(x.reshape(seq_len*batch_size, -1))

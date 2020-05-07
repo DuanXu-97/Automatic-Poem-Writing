@@ -23,11 +23,11 @@ def train(args):
     dataset = PoemDataset(data_path=config.data_path, config=config)
     dataloader = DataLoader(dataset, config.batch_size, shuffle=True, num_workers=config.num_workers)
     config.vocab_size = dataset.vocab_size
-
+    config.use_gpu = args.use_gpu
     model = getattr(network, args.model)(config).eval()
 
     if args.load_model_path:
-        model.load(args.load_model_path)
+        model.load(args.load_model_path, use_gpu=args.use_gpu)
     if args.use_gpu:
         model.cuda()
 
