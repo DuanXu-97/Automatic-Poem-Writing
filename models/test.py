@@ -115,7 +115,7 @@ if __name__ == '__main__':
     parser.add_argument('--load_model_path', type=str, required=True, help="Path of trained model")
     parser.add_argument('--acrostic', action='store_true', help="whether generate acrostic poem")
     parser.add_argument('--given_words', type=str, default='千山鸟飞绝', help="given words to generate poem")
-    parser.add_argument('--prefix_words', type=str, default='', help="given words to generate poem")
+    parser.add_argument('--prefix_words', type=str, default='床前明月光，疑是地上霜。', help="given words to generate poem")
 
     args = parser.parse_args()
 
