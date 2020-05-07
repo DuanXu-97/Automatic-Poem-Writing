@@ -140,7 +140,7 @@ class BiGRU(BasicModule):
 
         x = self.embeddings(x)
         x, hidden = self.gru(x, h_0)
-        x = t.mean(x.reshape(seq_len*batch_size, 2, self.config.hidden_size), dim=1)
+        x = t.mean(x.reshape(seq_len*batch_size, 2, self.config.hidden_dim), dim=1)
         x = self.fc1(x)
         output = self.fc2(x)
 
