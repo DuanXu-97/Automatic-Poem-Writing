@@ -171,12 +171,10 @@ class ShortcutGRU(BasicModule):
             h1_0, h2_0 = hidden
 
         x = self.embeddings(x)
-        index_1 = t.LongTensor([0, 1]).cuda() if self.config.use_gpu else t.LongTensor([0, 1])
-        gru1_output, gru1_hidden = self.gru1(x, t.index_select(h1_0, dim=0, index=index_1))
+        gru1_output, gru1_hidden = self.gru1(x, h1_0)
         x = t.cat([x, gru1_output], dim=-1)
         x = self.dropout(x)
-        index_2 = t.LongTensor([2, 3]).cuda() if self.config.use_gpu else t.LongTensor([0, 1])
-        x, gru2_hidden = self.gru2(x, t.index_select(h2_0, dim=0, index=index_2))
+        x, gru2_hidden = self.gru2(x, h2_0)
         x = self.dropout(x)
         output = self.fc(x)
         hidden = (gru1_hidden, gru2_hidden)
