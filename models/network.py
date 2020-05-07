@@ -127,7 +127,8 @@ class BiGRU(BasicModule):
         self.config = config
         self.embeddings = nn.Embedding(self.config.vocab_size, self.config.embedding_dim)
         self.gru = nn.GRU(self.config.embedding_dim, self.config.hidden_dim, num_layers=self.config.num_layers, batch_first=False, bidirectional=True)
-        self.fc = nn.Linear(2*self.config.hidden_dim, self.config.vocab_size)
+        self.fc1 = nn.Linear(self.config.hidden_dim, self.config.hidden_dim // 2)
+        self.fc2 = nn.Linear(self.config.hidden_dim // 2, self.config.vocab_size)
 
     def forward(self, x, hidden=None):
         seq_len, batch_size = x.size()
@@ -139,7 +140,10 @@ class BiGRU(BasicModule):
 
         x = self.embeddings(x)
         x, hidden = self.gru(x, h_0)
-        output = self.fc(x.reshape(seq_len*batch_size, -1))
+        x = t.mean(x.reshape(seq_len*batch_size, 2, self.config.hidden_size), dim=1)
+        x = self.fc1(x)
+        output = self.fc2(x)
+
         return output, hidden
 
 
