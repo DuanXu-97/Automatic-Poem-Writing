@@ -157,9 +157,8 @@ class ShortcutGRU(BasicModule):
         self.config = config
         self.embeddings = nn.Embedding(self.config.vocab_size, self.config.embedding_dim)
         self.gru1 = nn.GRU(self.config.embedding_dim, self.config.hidden_dim_1, num_layers=self.config.num_layers, batch_first=False)
-        self.dropout1 = nn.Dropout(self.config.dropout_rate)
         self.gru2 = nn.GRU(self.config.embedding_dim + self.config.hidden_dim_1, self.config.hidden_dim_2, num_layers=self.config.num_layers, batch_first=False)
-        self.dropout2 = nn.Dropout(self.config.dropout_rate)
+        self.dropout = nn.Dropout(self.config.dropout_rate)
         self.fc = nn.Linear(self.config.hidden_dim_2, self.config.vocab_size)
 
     def forward(self, x, hidden=None):
@@ -171,10 +170,14 @@ class ShortcutGRU(BasicModule):
             h_0 = hidden
 
         x = self.embeddings(x)
-        gru1_output, gru1_hidden = self.gru1(x, t.index_select(h_0, dim=0, index=t.LongTensor([0, 1])))
+        index_1 = t.LongTensor([0, 1]).cuda() if self.config.use_gpu else t.LongTensor([0, 1])
+        gru1_output, gru1_hidden = self.gru1(x, t.index_select(h_0, dim=0, index=index_1))
         x = t.cat([x, gru1_output], dim=-1)
-        gru2_output, gru2_hidden = self.gru2(x, t.index_select(h_0, dim=0, index=t.LongTensor([2, 3])))
-        output = self.fc(gru2_output)
+        x = self.dropout(x)
+        index_2 = t.LongTensor([2, 3]).cuda() if self.config.use_gpu else t.LongTensor([0, 1])
+        x, gru2_hidden = self.gru2(x, t.index_select(h_0, dim=0, index=index_2))
+        x = self.dropout(x)
+        output = self.fc(x)
         hidden = t.cat([gru1_hidden, gru2_hidden], dim=0)
 
         return output, hidden
