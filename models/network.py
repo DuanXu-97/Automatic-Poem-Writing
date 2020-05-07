@@ -132,7 +132,7 @@ class BiGRU(BasicModule):
     def forward(self, x, hidden=None):
         seq_len, batch_size = x.size()
         if hidden is None:
-            h_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
+            h_0 = x.data.new(4, batch_size, self.config.hidden_dim).fill_(0).float()
             h_0 = Variable(h_0)
         else:
             h_0 = hidden
