@@ -176,7 +176,7 @@ class ShortcutGRU(BasicModule):
         x = self.dropout(x)
         x, gru2_hidden = self.gru2(x, h2_0)
         x = self.dropout(x)
-        output = self.fc(x)
+        output = self.fc(x.reshape(seq_len*batch_size, -1))
         hidden = (gru1_hidden, gru2_hidden)
 
         return output, hidden
