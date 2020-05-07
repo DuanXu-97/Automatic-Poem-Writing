@@ -32,7 +32,7 @@ def train(args):
         model.cuda()
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=config.lr, weight_decay=1e-5)
+    optimizer = optim.Adam(model.parameters(), lr=config.lr)
     loss_meter = meter.AverageValueMeter()
 
     time_begin = time.clock()

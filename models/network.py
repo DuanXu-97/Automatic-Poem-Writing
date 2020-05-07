@@ -77,7 +77,7 @@ class LSTM(BasicModule):
 
         self.config = config
         self.embeddings = nn.Embedding(self.config.vocab_size, self.config.embedding_dim)
-        self.lstm = nn.LSTM(self.config.embedding_dim, self.config.hidden_dim, num_layers=2, batch_first=False, dropout=self.config.dropout_rate)
+        self.lstm = nn.LSTM(self.config.embedding_dim, self.config.hidden_dim, num_layers=self.config.num_layers, batch_first=False)
         self.fc = nn.Linear(self.config.hidden_dim, self.config.vocab_size)
 
     def forward(self, x, hidden=None):
@@ -93,4 +93,56 @@ class LSTM(BasicModule):
         x, hidden = self.lstm(x, (h_0, c_0))
         output = self.fc(x.reshape(seq_len*batch_size, -1))
         return output, hidden
+
+
+class GRU(BasicModule):
+
+    def __init__(self, config):
+        super(GRU, self).__init__()
+
+        self.config = config
+        self.embeddings = nn.Embedding(self.config.vocab_size, self.config.embedding_dim)
+        self.gru = nn.GRU(self.config.embedding_dim, self.config.hidden_dim, num_layers=self.config.num_layers, batch_first=False)
+        self.fc = nn.Linear(self.config.hidden_dim, self.config.vocab_size)
+
+    def forward(self, x, hidden=None):
+        seq_len, batch_size = x.size()
+        if hidden is None:
+            h_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
+            c_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
+            h_0, c_0 = Variable(h_0), Variable(c_0)
+        else:
+            h_0, c_0 = hidden
+
+        x = self.embeddings(x)
+        x, hidden = self.gru(x, (h_0, c_0))
+        output = self.fc(x.reshape(seq_len*batch_size, -1))
+        return output, hidden
+
+
+class BiGRU(BasicModule):
+
+    def __init__(self, config):
+        super(BiGRU, self).__init__()
+
+        self.config = config
+        self.embeddings = nn.Embedding(self.config.vocab_size, self.config.embedding_dim)
+        self.gru = nn.GRU(self.config.embedding_dim, self.config.hidden_dim, num_layers=self.config.num_layers, batch_first=False, bidirectional=True)
+        self.fc = nn.Linear(2*self.config.hidden_dim, self.config.vocab_size)
+
+    def forward(self, x, hidden=None):
+        seq_len, batch_size = x.size()
+        if hidden is None:
+            h_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
+            c_0 = x.data.new(2, batch_size, self.config.hidden_dim).fill_(0).float()
+            h_0, c_0 = Variable(h_0), Variable(c_0)
+        else:
+            h_0, c_0 = hidden
+
+        x = self.embeddings(x)
+        x, hidden = self.gru(x, (h_0, c_0))
+        output = self.fc(x.reshape(seq_len*batch_size, -1))
+        return output, hidden
+
+
 

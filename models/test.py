@@ -33,9 +33,10 @@ def generate_with_beginning(args):
         input = input.cuda()
     hidden = None
 
-    for word in args.prefix_words:
-        output, hidden = model(input, hidden)
-        input = Variable(input.data.new([config.word2ix[word]]).view(1,1))
+    if len(args.prefix_words) > 0:
+        for word in args.prefix_words:
+            output, hidden = model(input, hidden)
+            input = Variable(input.data.new([config.word2ix[word]]).view(1,1))
 
     for i in range(config.max_len):
         output, hidden = model(input, hidden)
@@ -46,7 +47,6 @@ def generate_with_beginning(args):
 
         else:
             word_index = output.data[0].topk(1)[1][0].item()
-            print(word_index)
             word = config.ix2word[word_index]
             poem.append(word)
             input = Variable(input.data.new([word_index]).view(1,1))
@@ -78,9 +78,10 @@ def generate_with_acrostic(args):
     acrostic_index = 0
     pre_word = '<START>'
 
-    for word in args.prefix_words:
-        output, hidden = model(input, hidden)
-        input = Variable(input.data.new([config.word2ix[word]]).view(1,1))
+    if len(args.prefix_words) > 0:
+        for word in args.prefix_words:
+            output, hidden = model(input, hidden)
+            input = Variable(input.data.new([config.word2ix[word]]).view(1,1))
 
     for i in range(config.max_len):
         output, hidden = model(input, hidden)
@@ -110,8 +111,8 @@ if __name__ == '__main__':
     parser.add_argument('--use_gpu', action='store_true', help="whether use gpu")
     parser.add_argument('--load_model_path', type=str, required=True, help="Path of trained model")
     parser.add_argument('--acrostic', action='store_true', help="whether generate acrostic poem")
-    parser.add_argument('--given_words', type=str, required=True, help="given words to generate poem")
-    parser.add_argument('--prefix_words', type=str, default='床前明月光，疑是地上霜', help="given words to generate poem")
+    parser.add_argument('--given_words', type=str, default='床前明月光', help="given words to generate poem")
+    parser.add_argument('--prefix_words', type=str, default='', help="given words to generate poem")
 
     args = parser.parse_args()
 
@@ -120,5 +121,5 @@ if __name__ == '__main__':
     else:
         poem = generate_with_beginning(args)
 
-    print(poem)
+    print(''.join(poem))
 
