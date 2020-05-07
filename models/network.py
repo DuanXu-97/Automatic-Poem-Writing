@@ -136,7 +136,9 @@ class BiGRU(BasicModule):
             h_0 = x.data.new(4, batch_size, self.config.hidden_dim).fill_(0).float()
             h_0 = Variable(h_0)
         else:
-            h_0 = hidden
+            h_0_backward = x.data.new(self.config.num_layers, 1, batch_size, self.config.hidden_dim).fill_(0).float()
+            h_0_forward = t.gather(hidden.reshape(self.config.num_layers, 2, batch_size, self.config.hidden_dim), dim=1, index=t.Tensor([0]))
+            h_0 = t.cat([h_0_forward, h_0_backward], dim=1).reshape(self.config.num_layers*2, batch_size, self.config.hidden_dim)
 
         x = self.embeddings(x)
         x, hidden = self.gru(x, h_0)

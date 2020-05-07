@@ -35,13 +35,13 @@ def generate_with_beginning(args):
 
     if len(args.prefix_words) > 0:
         for word in args.prefix_words:
-            output, hidden = model(input)
+            output, hidden = model(input, hidden)
             input = Variable(input.data.new([config.word2ix[word]]).view(1,1))
 
     for i in range(config.max_len):
-        output, hidden = model(input)
+        output, hidden = model(input, hidden)
 
-        if i<given_words_len:
+        if i < given_words_len:
             word = args.given_words[i]
             input = Variable(input.data.new([config.word2ix[word]]).view(1,1))
 
