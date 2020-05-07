@@ -85,8 +85,9 @@ class BiGRUConfig(object):
 
     num_layers = 2
     embedding_dim = 128
-    hidden_dim = 256
-    dropout_rate = 0.1
+    hidden_dim_1 = 128
+    hidden_dim_2 = 256
+    dropout_rate = 0.05
     max_len = 125
 
     batch_size = 128

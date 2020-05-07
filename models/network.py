@@ -149,4 +149,34 @@ class BiGRU(BasicModule):
         return output, hidden
 
 
+class ShortcutGRU(BasicModule):
+
+    def __init__(self, config):
+        super(ShortcutGRU, self).__init__()
+
+        self.config = config
+        self.embeddings = nn.Embedding(self.config.vocab_size, self.config.embedding_dim)
+        self.gru1 = nn.GRU(self.config.embedding_dim, self.config.hidden_dim_1, num_layers=self.config.num_layers, batch_first=False)
+        self.dropout1 = nn.Dropout(self.config.dropout_rate)
+        self.gru2 = nn.GRU(self.config.embedding_dim + self.config.hidden_dim_1, self.config.hidden_dim_2, num_layers=self.config.num_layers, batch_first=False)
+        self.dropout2 = nn.Dropout(self.config.dropout_rate)
+        self.fc = nn.Linear(self.config.hidden_dim_2, self.config.vocab_size)
+
+    def forward(self, x, hidden=None):
+        seq_len, batch_size = x.size()
+        if hidden is None:
+            h_0 = x.data.new(4, batch_size, self.config.hidden_dim_1).fill_(0).float()
+            h_0 = Variable(h_0)
+        else:
+            h_0 = hidden
+
+        x = self.embeddings(x)
+        gru1_output, gru1_hidden = self.gru1(x, t.index_select(h_0, dim=0, index=t.LongTensor([0, 1])))
+        x = t.cat([x, gru1_output], dim=-1)
+        gru2_output, gru2_hidden = self.gru2(x, t.index_select(h_0, dim=0, index=t.LongTensor([2, 3])))
+        output = self.fc(gru2_output)
+        hidden = t.cat([gru1_hidden, gru2_hidden], dim=0)
+
+        return output, hidden
+
 
