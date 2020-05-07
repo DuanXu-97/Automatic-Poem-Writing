@@ -61,6 +61,9 @@ def generate_with_acrostic(args):
     config = getattr(configs, args.model + 'Config')()
     dataset = PoemDataset(data_path=config.data_path, config=config)
     config.vocab_size = dataset.vocab_size
+    config.word2ix = dataset.word2ix
+    config.ix2word = dataset.ix2word
+    config.use_gpu = args.use_gpu
     model = getattr(network, args.model)(config).eval()
 
     if args.load_model_path:
