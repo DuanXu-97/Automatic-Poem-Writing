@@ -114,8 +114,8 @@ if __name__ == '__main__':
     parser.add_argument('--use_gpu', action='store_true', help="whether use gpu")
     parser.add_argument('--load_model_path', type=str, required=True, help="Path of trained model")
     parser.add_argument('--acrostic', action='store_true', help="whether generate acrostic poem")
-    parser.add_argument('--given_words', type=str, default='月落乌啼霜满天', help="given words to generate poem")
-    parser.add_argument('--prefix_words', type=str, default='独怜幽草涧边生，上有黄鹂深树鸣。', help="given words to generate poem")
+    parser.add_argument('--given_words', type=str, default='雁栖湖畔', help="given words to generate poem")
+    parser.add_argument('--prefix_words', type=str, default='', help="given words to generate poem")
 
     args = parser.parse_args()
 
