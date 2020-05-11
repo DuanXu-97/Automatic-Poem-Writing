@@ -18,7 +18,7 @@ class AttLSTMConfig(object):
     max_len = 125
 
     batch_size = 128
-    epoch = 20
+    epoch = 50
     lr = 0.001
     seed = 10
 
@@ -42,7 +42,7 @@ class LSTMConfig(object):
     max_len = 125
 
     batch_size = 128
-    epoch = 20
+    epoch = 50
     lr = 0.001
     seed = 10
 
